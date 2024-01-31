@@ -2,10 +2,26 @@ const { generateToken, decodeToken } = require("../middlewares/tokenHandler");
 const sendmail = require('../middlewares/sendMail');
 const User = require("../models/User");
 const bcrypt = require('bcrypt');
+const Joi = require('joi');
 
 const register = async (req, res) => {
     const { name, email, password } = req.body;
+
+    const schema = Joi.object({
+        name: Joi.string().required(),
+        email: Joi.string().email().required(),
+        password: Joi.string().min(6).required()
+    });
+
     try {
+        const { error } = schema.validate({ name, email, password });
+        if (error) {
+            return res.status(400).json({
+                error: true,
+                message: error.details[0].message
+            });
+        }
+
         const existingUser = await User.findOne({ email });
         if (existingUser) {
             return res.status(403).json({
@@ -37,6 +53,19 @@ const register = async (req, res) => {
 const login = async (req, res) => {
     const { email, password } = req.body;
     try {
+        const schema = Joi.object({
+            email: Joi.string().email().required(),
+            password: Joi.string().min(6).required()
+        });
+
+        const { error } = schema.validate({ email, password });
+        if (error) {
+            return res.status(400).json({
+                error: true,
+                message: error.details[0].message
+            });
+        }
+
         const user = await User.findOne({ email });
         if (!user) {
             return res.status(403).json({
@@ -103,6 +132,19 @@ const resetPassword = async (req, res) => {
         const token = req.params.token;
         const decoded = decodeToken(token);
         const user = await User.findOne({ email: decoded.email });
+
+        const schema = Joi.object({
+            newPassword: Joi.string().required().min(6)
+        });
+
+        const { error } = schema.validate(req.body);
+        if (error) {
+            return res.status(400).json({
+                error: true,
+                message: error.details[0].message
+            });
+        }
+
         const { newPassword } = req.body;
         const hash = await bcrypt.hash(newPassword, 10);
         user.password = hash;
