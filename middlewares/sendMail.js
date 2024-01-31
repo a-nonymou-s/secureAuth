@@ -1,6 +1,6 @@
 const nodemailer = require('nodemailer');
 require('dotenv').config();
-export default async function sendmail(email, subject, text){
+async function sendmail(email, subject, text){
     try {
         const mailOptions = {
             from: process.env.GUSER,
@@ -20,3 +20,5 @@ export default async function sendmail(email, subject, text){
         console.log(err);
     }
 }
+
+module.exports = sendmail;

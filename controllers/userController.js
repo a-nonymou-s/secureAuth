@@ -12,10 +12,10 @@ const register = async (req, res) => {
                 message: "Email already in use"
             })
         };
-        const hash = bcrypt.hash(password, 10)
+        const hash = await bcrypt.hash(password, 10)
         const user = new User({name: name, email: email, password: hash, isVerified: false});
-        const token = generateToken(user);
-        sendmail(email, "Email Confirmation", `Click <a href="http://localhost:${process.env.PORT}/verify/${token}">here in order to verify your email.`)
+        const token = generateToken({name: name, email: email, password: hash, isVerified: false});
+        sendmail(email, "Email Confirmation", `Click <a href="http://localhost:${process.env.PORT}/auth/verify/${token}">here in order to verify your email.`)
         user.save().then((response) => {
             return res.status(201).json({
                 error: false,
@@ -40,7 +40,7 @@ const register = async (req, res) => {
 const login = async (req, res) => {
     const { email, password } = req.body;
     try{
-        const us = await user.findOne({ email: email });
+        const us = await User.findOne({ email: email });
         if(!us){
             return res.status(403).json({
                 error: true,
@@ -48,10 +48,10 @@ const login = async (req, res) => {
             });
         }
         if(bcrypt.compare(password, us.password)){
-        const token = generateToken(us);
+        const token = generateToken({name: us.name, email: us.email, password: us.password, isVerified: us.isVerified});
         return res.status(200).json({
             accessToken: token,
-            userID: user._id,
+            userID: us._id,
             message: "Logged In Successfully"
         })
         }
@@ -70,12 +70,12 @@ const verifyEmail = async (req, res) => {
         const user = await User.findOne({ email: decoded.email });
         user.isVerified = true;
         await user.save();
-        res.send(200).json({
+        return res.status(200).json({
             error: false,
             message: "Email Verified Successfully"
         })
     } catch(err) {
-        res.send(500).json({
+        return res.status(500).json({
             error: true,
             message: `Internal Server Error : ${err}`
         })
