@@ -1,0 +1,37 @@
+{
+  "name": "secureauth",
+  "version": "1.0.0",
+  "description": "Secure Authentication System using Node.js, Express.js, MongoDB - Login Logout System, Password Reset, Email Verification",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/a-nonymou-s/secureAuth.git"
+  },
+  "keywords": [
+    "auth",
+    "login",
+    "logout",
+    "reset",
+    "password",
+    "security",
+    "JWT"
+  ],
+  "author": "ANONY1691",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/a-nonymou-s/secureAuth/issues"
+  },
+  "homepage": "https://github.com/a-nonymou-s/secureAuth#readme",
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.1",
+    "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.1.1",
+    "nodemailer": "^6.9.8"
+  }
+}
