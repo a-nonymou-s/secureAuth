@@ -81,9 +81,47 @@ const verifyEmail = async (req, res) => {
         })
     };
 }
+const sendResetPassword = async (req, res) => {
+    try{
+    const token = req.header('Authorization').toString().replace('Bearer ', '');
+    const decoded = decodeToken(token);
+    sendmail(decoded.email, "Password Reset", `Click <a href="http://localhost:${process.env.PORT}/auth/reset/${token}">here in order to reset your pasword.`)
+    return res.status(200).json({
+        error: false,
+        message: 'Password Reset Link Successfully Sent.'
+    })    
+} catch(err) {
+    return res.status(500).json({
+        error: true,
+        message: `Internal Server Error : ${err}`
+    })
+}
+}
+const resetPassword = async (req, res) => {
+    try {
+        const token = req.params.token;
+        const decoded = decodeToken(token);
+        const user = await User.findOne({ email: decoded.email });
+        const { newPassword } = req.body;
+        const hash = await bcrypt.hash(newPassword, 10);
+        user.password = hash;
+        await user.save();
+        return res.status(200).json({
+            error: false,
+            message: "Password Changed Successfully"
+        })
+    } catch(error) {
+        return res.status(500).json({
+            error: true,
+            message: `Internal Server Error : ${err}`
+        })
+    };
+}
 
 module.exports = {
     register,
     login,
-    verifyEmail
+    verifyEmail,
+    resetPassword,
+    sendResetPassword
 }
